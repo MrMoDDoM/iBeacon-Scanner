@@ -1,6 +1,17 @@
+import blescan
+import sys
+import os
+import bluetooth._bluetooth as bluez
+import argparse
 
-# test BLE Scanning software
-# jcs 6/8/2014
+parser = argparse.ArgumentParser(description='Reliable Bluetooth LE (iBeacon) scanner')
+parser.add_argument('--ID', type=int, default=0, help='Bluetooth adapter ID')
+# parser.add_argument('', dest='accumulate', action='store_const',
+#                    const=sum, default=max,
+#                    help='sum the integers (default: find the max)')
+
+args = parser.parse_args()
+#print(args.accumulate(args.integers))
 
 # Console colors
 W = '\033[0m'  # white (normal)
@@ -12,10 +23,6 @@ P = '\033[35m'  # purple
 C = '\033[36m'  # cyan
 GR = '\033[37m'  # gray
 
-import blescan
-import sys
-import os
-import bluetooth._bluetooth as bluez
 
 def printLogo():
 	logo = """
@@ -46,32 +53,30 @@ def badExit():
 	print W
 	sys.exit(1)
 
-dev_id = 1
-
 print O
 printLogo()
 
+printInfo("Starting BLE thread on device ID: " + str(args.ID) + "...")
 try:
-	sock = bluez.hci_open_dev(dev_id)
-	printInfo("BLE thread started...")
+	sock = bluez.hci_open_dev(int(args.ID))
 
 except:
 	printError("Error accessing bluetooth device!")
     	badExit()
 
 try:
-	printInfo("Setting up BLE device...")
+	printInfo("Setting up BLE device ...")
 	blescan.hci_le_set_scan_parameters(sock)
 
 except:
-	printError("Error accessing bluetooth device!")
+	printError("Error setting up bluetooth device!")
 	badExit()
 
 try:
 	printInfo("Start scanning...")
 	blescan.hci_enable_le_scan(sock)
 except:
-	printError("Error accessing bluetooth device! Maybe not root?")
+	printError("Error scanning! Maybe not root?")
 	badExit()
 
 while True:
