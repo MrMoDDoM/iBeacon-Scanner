@@ -161,17 +161,24 @@ def parse_events(sock, loop_count=100):
                     	rssi, = struct.unpack("b", pkt[report_pkt_offset -1])
                     	print "\tRSSI:", rssi
 		    # build the return string
-                    Adstring = packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
-		    Adstring += ","
-		    Adstring += returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6]) 
-		    Adstring += ","
-		    Adstring += "%i" % returnnumberpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4]) 
-		    Adstring += ","
-		    Adstring += "%i" % returnnumberpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2]) 
-		    Adstring += ","
-		    Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -2])
-		    Adstring += ","
-		    Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -1])
+                    #Adstring = packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9])
+		    #Adstring += ","
+		    #Adstring += returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6]) 
+		    #Adstring += ","
+		    #Adstring += "%i" % returnnumberpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4]) 
+		    #Adstring += ","
+		    #Adstring += "%i" % returnnumberpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2]) 
+		    #Adstring += ","
+		    #Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -2])
+		    #Adstring += ","
+		    #Adstring += "%i" % struct.unpack("b", pkt[report_pkt_offset -1])
+		    #Build a dictionary for the single result
+		    Adstring = {'MAC':packed_bdaddr_to_string(pkt[report_pkt_offset + 3:report_pkt_offset + 9]),
+				'UUID': returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6]),
+				'MAJOR': returnnumberpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4]), 
+				'MINOR': returnnumberpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2]),
+				'UNKNOW': struct.unpack("b", pkt[report_pkt_offset -2]),
+				'RSSI': struct.unpack("b", pkt[report_pkt_offset -1])}
 
 		    #print "\tAdstring=", Adstring
  		    myFullList.append(Adstring)
