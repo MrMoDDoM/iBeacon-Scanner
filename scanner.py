@@ -1,17 +1,17 @@
+#!/usr/bin/python
+
 import blescan
 import sys
 import os
 import bluetooth._bluetooth as bluez
 import argparse
 
+#Arguments parser
 parser = argparse.ArgumentParser(description='Reliable Bluetooth LE (iBeacon) scanner')
-parser.add_argument('--ID', type=int, default=0, help='Bluetooth adapter ID')
-# parser.add_argument('', dest='accumulate', action='store_const',
-#                    const=sum, default=max,
-#                    help='sum the integers (default: find the max)')
+parser.add_argument('-i', type=int, default=0, help='Bluetooth adapter ID')
+parser.add_argument('-t', type=int, default=10, help='Seconds between two survey. A small value can cause some beacon to be missed')
 
 args = parser.parse_args()
-#print(args.accumulate(args.integers))
 
 # Console colors
 W = '\033[0m'  # white (normal)
@@ -53,27 +53,29 @@ def badExit():
 	print W
 	sys.exit(1)
 
+#Orange logo
 print O
 printLogo()
 
-printInfo("Starting BLE thread on device ID: " + str(args.ID) + "...")
+printInfo("Starting BLE thread on device ID: " + str(args.i) + "...")
 try:
-	sock = bluez.hci_open_dev(int(args.ID))
+	sock = bluez.hci_open_dev(int(args.i))
 
 except:
 	printError("Error accessing bluetooth device!")
     	badExit()
 
+
+printInfo("Setting up BLE device ...")
 try:
-	printInfo("Setting up BLE device ...")
 	blescan.hci_le_set_scan_parameters(sock)
 
 except:
 	printError("Error setting up bluetooth device!")
 	badExit()
 
+printInfo("Start scanning...")
 try:
-	printInfo("Start scanning...")
 	blescan.hci_enable_le_scan(sock)
 except:
 	printError("Error scanning! Maybe not root?")
@@ -81,13 +83,16 @@ except:
 
 while True:
 	try:
-		returnedList = blescan.parse_events(sock, 10)
+		#Try to retrive the full scan result
+		returnedList = blescan.parse_events(sock, args.t)
 
 		purgedList = []
 		seen = set()
 		purgedList = []
+		#We search and delete all the beacon from the same device
+		#Looping througth the returnedList, every time we found a MAC adr
+		#that is not present in 'seen', we add it to 'seen' and 'purgedList'
 		for d in returnedList:
-		    #t = tuple(d.items())
 		    t = d['MAC']
 		    if t not in seen:
 		        seen.add(t)
@@ -95,36 +100,27 @@ while True:
 
 		os.system('clear')
 
+		#Orange logo
 		print O
 		printLogo()
 
-		print G + "Mac \t\t  UUID \t\t\t\t   MAJOR \t  MINUM \t RSSI \t\t Unknow"
+		print G + "Mac \t\t  MAJOR \tMINUM\tRSSI \tUnknow \tUUID"
 		for beacon in purgedList:
 			print beacon['MAC'] ,
-			print beacon['UUID'] ,
 			print beacon['MAJOR'] ,
+			print '\t' ,
 			print beacon['MINOR'] ,
+			print '\t' ,
 			print beacon['RSSI'] ,
-			print beacon['UNKNOW']
+			print '\t' ,
+			print beacon['UNKNOW'] ,
+			print '\t' ,
+			print beacon['UUID']
 		print P+"Scanning.... "
-	except KeyboardInterrupt:
+	except KeyboardInterrupt: #Did the user press CTRL+C ?
 		print
 		printInfo("User press CTRL+C")
 		gracefulExit()
-	except:
+	except Exception, e: #Did somethings went wrong? (ie. removed BT adapter)
+		printError(str(e))
 		badExit()
-
-
-
-
-
-# teams_list = ["Man Utd", "Man City", "T Hotspur"]
-# data = np.array([[1, 2, 1],
-#                  [0, 1, 0],
-#                  [2, 4, 2]])
-
-
-# row_format ="{:>15}" * (len(teams_list) + 1)
-# print row_format.format("", *teams_list)
-# for team, row in zip(teams_list, data):
-#     print row_format.format(team, *row)

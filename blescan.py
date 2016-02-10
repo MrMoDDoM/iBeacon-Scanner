@@ -1,7 +1,6 @@
 # BLE iBeaconScanner based on https://github.com/adamf/BLE/blob/master/ble-scanner.py
 # JCS 06/07/14
 
-DEBUG = False
 # BLE scanner based on https://github.com/adamf/BLE/blob/master/ble-scanner.py
 # BLE scanner, based on https://code.google.com/p/pybluez/source/browse/trunk/examples/advanced/inquiry-with-rssi.py
 
@@ -14,6 +13,8 @@ DEBUG = False
 
 # NOTE: Python's struct.pack() will add padding bytes unless you make the endianness explicit. Little endian
 # should be used for BLE. Always start a struct.pack() format string with "<"
+
+DEBUG = False
 
 import os
 import sys
@@ -146,7 +147,6 @@ def parse_events(sock, loop_count=100):
                 num_reports = struct.unpack("B", pkt[0])[0]
                 report_pkt_offset = 0
                 for i in range(0, num_reports):
-		
 		    if (DEBUG == True):
 			print "-------------"
                     	#print "\tfullpacket: ", printpacket(pkt)
