@@ -177,7 +177,7 @@ def parse_events(sock, loop_count=100):
 				'UUID': returnstringpacket(pkt[report_pkt_offset -22: report_pkt_offset - 6]),
 				'MAJOR': returnnumberpacket(pkt[report_pkt_offset -6: report_pkt_offset - 4]), 
 				'MINOR': returnnumberpacket(pkt[report_pkt_offset -4: report_pkt_offset - 2]),
-				'UNKNOW': struct.unpack("b", pkt[report_pkt_offset -2]),
+				'TxPOWER': struct.unpack("b", pkt[report_pkt_offset -2]),
 				'RSSI': struct.unpack("b", pkt[report_pkt_offset -1])}
 
 		    #print "\tAdstring=", Adstring

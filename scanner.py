@@ -53,6 +53,17 @@ def badExit():
 	print W
 	sys.exit(1)
 
+def getDistance(txP, rssi):
+	txP = txP[0] 
+	rssi = rssi[0]
+	if(rssi == 0 or txP == 0):
+		return -4
+	
+	diff = txP - rssi
+	radio_linear = (diff / 10) ** 10
+	
+	return (radio_linear)**(1/2)
+
 #Orange logo
 print O
 printLogo()
@@ -81,6 +92,7 @@ except:
 	printError("Error scanning! Maybe not root?")
 	badExit()
 
+
 while True:
 	try:
 		#Try to retrive the full scan result
@@ -103,24 +115,16 @@ while True:
 		#Orange logo
 		print O
 		printLogo()
-
-		print G + "Mac \t\t  MAJOR \tMINUM\tRSSI \tUnknow \tUUID"
+		#Formated output for result
+		print G + "{0:<20s}{1:<10s}{2:<10s}{3:<10s}{4:<10s}{5:<13s}{6:<10s}".format("MAC","MAJOR","MINOR","RSSI","TxPOWER","DISTANCE(m)","UUDI")
 		for beacon in purgedList:
-			print beacon['MAC'] ,
-			print beacon['MAJOR'] ,
-			print '\t' ,
-			print beacon['MINOR'] ,
-			print '\t' ,
-			print beacon['RSSI'] ,
-			print '\t' ,
-			print beacon['UNKNOW'] ,
-			print '\t' ,
-			print beacon['UUID']
+			print("{0:<20s}{1:<10}{2:<10}{3:<10d}{4:<10d}{5:<13.2f}{6:<10}".format(beacon['MAC'],beacon['MAJOR'],beacon['MINOR'],beacon['RSSI'][0],beacon['TxPOWER'][0],getDistance(beacon['TxPOWER'], beacon['RSSI']),beacon['UUID']))
+
 		print P+"Scanning.... "
 	except KeyboardInterrupt: #Did the user press CTRL+C ?
 		print
 		printInfo("User press CTRL+C")
 		gracefulExit()
-	except Exception, e: #Did somethings went wrong? (ie. removed BT adapter)
+	except Exception, e: #Did somethings went wrong? (ie. hot-unpluged  BT adapter)
 		printError(str(e))
 		badExit()
