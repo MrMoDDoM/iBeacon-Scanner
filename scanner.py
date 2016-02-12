@@ -3,6 +3,7 @@
 import blescan
 import sys
 import os
+import math
 import bluetooth._bluetooth as bluez
 import argparse
 
@@ -10,6 +11,9 @@ import argparse
 parser = argparse.ArgumentParser(description='Reliable Bluetooth LE (iBeacon) scanner')
 parser.add_argument('-i', type=int, default=0, help='Bluetooth adapter ID')
 parser.add_argument('-t', type=int, default=10, help='Seconds between two survey. A small value can cause some beacon to be missed')
+parser.add_argument('-n', type=float, default=1.0, help='Path loss exponent')
+parser.add_argument('-pdz', type=int, default=1, help='TxPower at taring position')
+parser.add_argument('-dz', type=int, default=1, help='Distance of taring position (m) ')
 
 args = parser.parse_args()
 
@@ -53,16 +57,13 @@ def badExit():
 	print W
 	sys.exit(1)
 
-def getDistance(txP, rssi):
-	txP = txP[0] 
-	rssi = rssi[0]
-	if(rssi == 0 or txP == 0):
-		return -4
-	
-	diff = txP - rssi
-	radio_linear = (diff / 10) ** 10
-	
-	return (radio_linear)**(1/2)
+def getDistance(txP):
+
+	dist = args.dz * math.exp( (args.pdz - txP)/( 10 * args.n ) )
+
+	return dist
+
+
 
 #Orange logo
 print O
@@ -118,7 +119,7 @@ while True:
 		#Formated output for result
 		print G + "{0:<20s}{1:<10s}{2:<10s}{3:<10s}{4:<10s}{5:<13s}{6:<10s}".format("MAC","MAJOR","MINOR","RSSI","TxPOWER","DISTANCE(m)","UUDI")
 		for beacon in purgedList:
-			print("{0:<20s}{1:<10}{2:<10}{3:<10d}{4:<10d}{5:<13.2f}{6:<10}".format(beacon['MAC'],beacon['MAJOR'],beacon['MINOR'],beacon['RSSI'][0],beacon['TxPOWER'][0],getDistance(beacon['TxPOWER'], beacon['RSSI']),beacon['UUID']))
+			print("{0:<20s}{1:<10}{2:<10}{3:<10d}{4:<10d}{5:<13.2f}{6:<10}".format(beacon['MAC'],beacon['MAJOR'],beacon['MINOR'],beacon['RSSI'][0],beacon['TxPOWER'][0],getDistance(beacon['TxPOWER'][0]),beacon['UUID']))
 
 		print P+"Scanning.... "
 	except KeyboardInterrupt: #Did the user press CTRL+C ?
